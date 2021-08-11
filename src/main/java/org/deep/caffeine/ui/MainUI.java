@@ -46,62 +46,77 @@ public class MainUI extends JFrame {
         var expectedScrollPane = new JScrollPane(expectedArea);
         var outputScrollPane = new JScrollPane(outputArea);
 
-        add(pathField,
+        var pathPanel = new JPanel();
+        var pathPanelLayout = new BorderLayout(5, 0);
+        pathPanel.setLayout(pathPanelLayout);
+        var pathLabel = new JLabel("Directory:", JLabel.RIGHT);
+        pathPanel.add(pathLabel, BorderLayout.WEST);
+        pathPanel.add(pathField, BorderLayout.CENTER);
+        add(pathPanel,
                 new GBC(0, 0, 3, 1)
                         .setFill(GridBagConstraints.HORIZONTAL)
                         .setWeight(100, 0)
-                        .setInsets(10, 10, 5, 5));
+                        .setInsets(10, 10, 5, 10));
         add(browseButton,
                 new GBC(3, 0)
                         .setFill(GridBagConstraints.NONE)
                         .setWeight(100, 0)
                         .setAnchor(GridBagConstraints.WEST)
                         .setInsets(10, 5, 5, 10));
+
+        var etched = BorderFactory.createEtchedBorder();
+        fileTree.setBorder(etched);
         add(fileTree,
                 new GBC(0, 1, 4, 1)
                         .setFill(GridBagConstraints.BOTH)
                         .setWeight(100, 50)
-                        .setInsets(5, 10, 5, 10));
+                        .setInsets(10, 10, 5, 10));
 
-        var inputPane = new JPanel();
+        var inputPanel = new JPanel();
         var inputPaneLayout = new GridLayout(0, 2, 5, 0);
-        inputPane.setLayout(inputPaneLayout);
-        inputPane.add(inputScrollPane);
-        inputPane.add(expectedScrollPane);
-        add(inputPane, new GBC(0, 2, 4, 1)
+        inputPanel.setLayout(inputPaneLayout);
+        etched = BorderFactory.createEtchedBorder();
+        inputScrollPane.setBorder(BorderFactory.createTitledBorder(etched, "Input"));
+        inputPanel.add(inputScrollPane);
+        etched = BorderFactory.createEtchedBorder();
+        expectedScrollPane.setBorder(BorderFactory.createTitledBorder(etched, "Expected Output"));
+        inputPanel.add(expectedScrollPane);
+        add(inputPanel, new GBC(0, 2, 4, 1)
                 .setFill(GridBagConstraints.BOTH)
                 .setWeight(100, 100)
-                .setInsets(5, 10, 5, 10));
+                .setInsets(10, 10, 5, 10));
 
+        etched = BorderFactory.createEtchedBorder();
+        outputScrollPane.setBorder(BorderFactory.createTitledBorder(etched, "Output"));
         add(outputScrollPane,
                 new GBC(0, 3, 4, 1)
                         .setFill(GridBagConstraints.BOTH)
                         .setWeight(100, 100)
                         .setInsets(5, 10, 5, 10));
 
-        var leftButtonPane = new JPanel();
+        var leftButtonPanel = new JPanel();
         var leftGridLayout = new GridLayout(3, 1, 0, 5);
-        leftButtonPane.setLayout(leftGridLayout);
-        leftButtonPane.add(clearInputButton);
-        leftButtonPane.add(clearExpectedButton);
-        leftButtonPane.add(clearOutputButton);
-        add(leftButtonPane, new GBC(0, 4)
+        leftButtonPanel.setLayout(leftGridLayout);
+        leftButtonPanel.add(clearInputButton);
+        leftButtonPanel.add(clearExpectedButton);
+        leftButtonPanel.add(clearOutputButton);
+        add(leftButtonPanel, new GBC(0, 4)
                 .setFill(GridBagConstraints.NONE)
                 .setWeight(100, 0)
                 .setAnchor(GridBagConstraints.WEST)
-                .setInsets(5, 10, 10, 0));
+                .setInsets(10, 10, 10, 0));
 
-        var rightButtonPane = new JPanel();
+        var rightButtonPanel = new JPanel();
         var rightGridLayout = new GridLayout(3, 1, 0, 5);
-        rightButtonPane.setLayout(rightGridLayout);
-        rightButtonPane.add(formatFileButton);
-        rightButtonPane.add(compileFileButton);
-        rightButtonPane.add(runFileButton);
-        add(rightButtonPane, new GBC(3, 4)
+        rightButtonPanel.setLayout(rightGridLayout);
+        rightButtonPanel.add(formatFileButton);
+        rightButtonPanel.add(compileFileButton);
+        rightButtonPanel.add(runFileButton);
+        add(rightButtonPanel, new GBC(3, 4)
                 .setFill(GridBagConstraints.NONE)
                 .setWeight(100, 0)
                 .setAnchor(GridBagConstraints.EAST)
-                .setInsets(5, 0, 10, 10));
+                .setInsets(10, 0, 10, 10));
 
         pack();
     }
