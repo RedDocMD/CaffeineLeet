@@ -1,8 +1,14 @@
 package org.deep.caffeine.ui;
 
+import org.deep.caffeine.model.EmptyFileTreeNode;
+import org.deep.caffeine.model.FileTreeNode;
 import org.deep.caffeine.model.InterfaceModel;
 
 import javax.swing.*;
+import javax.swing.event.EventListenerList;
+import javax.swing.event.TreeModelListener;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -26,9 +32,12 @@ public class MainUI extends JFrame {
         setTitle("Caffeine Leet");
         setPreferredSize(new Dimension(800, 800));
 
+        interfaceModel = new InterfaceModel();
+
         pathField = new JTextField(50);
         browseButton = new JButton("Browse");
-        fileTree = new JTree();
+        var fileTreeModel = new FileTreeModel();
+        fileTree = new JTree(fileTreeModel);
         inputArea = new JTextArea();
         expectedArea = new JTextArea();
         outputArea = new JTextArea();
@@ -39,7 +48,6 @@ public class MainUI extends JFrame {
         compileFileButton = new JButton("Compile File");
         runFileButton = new JButton("Run File");
 
-        interfaceModel = new InterfaceModel();
 
         initLayout();
     }
@@ -52,6 +60,7 @@ public class MainUI extends JFrame {
         var inputScrollPane = new JScrollPane(inputArea);
         var expectedScrollPane = new JScrollPane(expectedArea);
         var outputScrollPane = new JScrollPane(outputArea);
+        var fileTreeScrollPane = new JScrollPane(fileTree);
 
         var pathPanel = new JPanel();
         var pathPanelLayout = new BorderLayout(5, 0);
@@ -72,11 +81,11 @@ public class MainUI extends JFrame {
                         .setInsets(10, 5, 5, 10));
 
         var etched = BorderFactory.createEtchedBorder();
-        fileTree.setBorder(etched);
-        add(fileTree,
+        fileTreeScrollPane.setBorder(etched);
+        add(fileTreeScrollPane,
                 new GBC(0, 1, 4, 1)
-                        .setFill(GridBagConstraints.BOTH)
-                        .setWeight(100, 50)
+                        .setFill(GridBagConstraints.HORIZONTAL)
+                        .setWeight(100, 0)
                         .setInsets(10, 10, 5, 10));
 
         var inputPanel = new JPanel();
@@ -134,6 +143,7 @@ public class MainUI extends JFrame {
                 if (interfaceModel.isMainDirectoryValid())
                     pathField.setForeground(Color.BLACK);
                 else pathField.setForeground(Color.RED);
+                fileTree.updateUI();
             }
         });
 
@@ -146,9 +156,72 @@ public class MainUI extends JFrame {
                 var dir = directoryChooser.getSelectedFile().getPath();
                 interfaceModel.setMainDirectory(dir);
                 pathField.setText(dir);
+                fileTree.updateUI();
             }
         });
 
         pack();
+    }
+
+    class FileTreeModel implements TreeModel {
+        private final EventListenerList  listenerList = new EventListenerList();
+
+        @Override
+        public Object getRoot() {
+            var dir = interfaceModel.getMainDirectory();
+            return interfaceModel.isMainDirectoryValid() ? new FileTreeNode(dir, true) : EmptyFileTreeNode.INSTANCE;
+        }
+
+        @Override
+        public Object getChild(Object parent, int index) {
+            var parentNode = (FileTreeNode) parent;
+            var children = parentNode.children();
+            return children.get(index);
+        }
+
+        @Override
+        public int getChildCount(Object parent) {
+            var parentNode = (FileTreeNode) parent;
+            return parentNode.childCount();
+        }
+
+        @Override
+        public boolean isLeaf(Object node) {
+            var nodeThing = (FileTreeNode) node;
+            return nodeThing.isLeaf();
+        }
+
+        @Override
+        public void valueForPathChanged(TreePath path, Object newValue) {
+
+        }
+
+        @Override
+        public int getIndexOfChild(Object parent, Object child) {
+            if (parent == null || child == null)
+                return -1;
+            var parentNode = (FileTreeNode) parent;
+            var childNode = (FileTreeNode) child;
+            var rootNode = (FileTreeNode) getRoot();
+            if (rootNode.hasChild(parentNode) && rootNode.hasChild(childNode) && parentNode.hasChild(childNode)) {
+                var children = parentNode.children();
+                for (int i = 0; i < children.size(); ++i) {
+                    var childFileNode = children.get(i);
+                    if (childFileNode.equals(childNode))
+                        return i;
+                }
+            }
+            return -1;
+        }
+
+        @Override
+        public void addTreeModelListener(TreeModelListener l) {
+            listenerList.add(TreeModelListener.class, l);
+        }
+
+        @Override
+        public void removeTreeModelListener(TreeModelListener l) {
+            listenerList.remove(TreeModelListener.class, l);
+        }
     }
 }
