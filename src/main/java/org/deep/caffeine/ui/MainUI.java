@@ -10,9 +10,6 @@ public class MainUI extends JFrame {
     private final JTextArea inputArea;
     private final JTextArea expectedArea;
     private final JTextArea outputArea;
-    private final JScrollPane inputScrollPane;
-    private final JScrollPane expectedScrollPane;
-    private final JScrollPane outputScrollPane;
     private final JButton clearInputButton;
     private final JButton clearExpectedButton;
     private final JButton clearOutputButton;
@@ -22,7 +19,7 @@ public class MainUI extends JFrame {
 
     public MainUI() {
         setTitle("Caffeine Leet");
-        setPreferredSize(new Dimension(1000, 700));
+        setPreferredSize(new Dimension(800, 800));
 
         pathField = new JTextField(50);
         browseButton = new JButton("Browse");
@@ -30,9 +27,7 @@ public class MainUI extends JFrame {
         inputArea = new JTextArea();
         expectedArea = new JTextArea();
         outputArea = new JTextArea();
-        inputScrollPane = new JScrollPane(inputArea);
-        expectedScrollPane = new JScrollPane(expectedArea);
-        outputScrollPane = new JScrollPane(outputArea);
+
         clearInputButton = new JButton("Clear Input");
         clearExpectedButton = new JButton("Clear Expected");
         clearOutputButton = new JButton("Clear Output");
@@ -46,6 +41,10 @@ public class MainUI extends JFrame {
     private void initLayout() {
         var layout = new GridBagLayout();
         setLayout(layout);
+
+        var inputScrollPane = new JScrollPane(inputArea);
+        var expectedScrollPane = new JScrollPane(expectedArea);
+        var outputScrollPane = new JScrollPane(outputArea);
 
         add(pathField,
                 new GBC(0, 0, 3, 1)
@@ -63,47 +62,42 @@ public class MainUI extends JFrame {
                         .setFill(GridBagConstraints.BOTH)
                         .setWeight(100, 50)
                         .setInsets(5, 10, 5, 10));
-        add(inputScrollPane,
-                new GBC(0, 2, 2, 1)
-                        .setFill(GridBagConstraints.BOTH)
-                        .setWeight(100, 100)
-                        .setInsets(5, 10, 5, 5));
-        add(expectedScrollPane,
-                new GBC(2, 2, 2, 1)
-                        .setFill(GridBagConstraints.BOTH)
-                        .setWeight(100, 100)
-                        .setInsets(5, 5, 5, 10));
+
+        var inputPane = new JPanel();
+        var inputPaneLayout = new GridLayout(0, 2, 5, 0);
+        inputPane.setLayout(inputPaneLayout);
+        inputPane.add(inputScrollPane);
+        inputPane.add(expectedScrollPane);
+        add(inputPane, new GBC(0, 2, 4, 1)
+                .setFill(GridBagConstraints.BOTH)
+                .setWeight(100, 100)
+                .setInsets(5, 10, 5, 10));
+
         add(outputScrollPane,
                 new GBC(0, 3, 4, 1)
                         .setFill(GridBagConstraints.BOTH)
                         .setWeight(100, 100)
                         .setInsets(5, 10, 5, 10));
-        add(clearInputButton, new GBC(0, 4)
-                .setFill(GridBagConstraints.NONE)
-                .setWeight(100, 0)
-                .setAnchor(GridBagConstraints.WEST)
-                .setInsets(5, 10, 5, 0));
-        add(clearExpectedButton, new GBC(0, 5)
-                .setFill(GridBagConstraints.NONE)
-                .setWeight(100, 0)
-                .setAnchor(GridBagConstraints.WEST)
-                .setInsets(5, 10, 5, 0));
-        add(clearOutputButton, new GBC(0, 6)
+
+        var leftButtonPane = new JPanel();
+        var leftGridLayout = new GridLayout(3, 1, 0, 5);
+        leftButtonPane.setLayout(leftGridLayout);
+        leftButtonPane.add(clearInputButton);
+        leftButtonPane.add(clearExpectedButton);
+        leftButtonPane.add(clearOutputButton);
+        add(leftButtonPane, new GBC(0, 4)
                 .setFill(GridBagConstraints.NONE)
                 .setWeight(100, 0)
                 .setAnchor(GridBagConstraints.WEST)
                 .setInsets(5, 10, 10, 0));
-        add(formatFileButton, new GBC(3, 4)
-                .setFill(GridBagConstraints.NONE)
-                .setWeight(100, 0)
-                .setAnchor(GridBagConstraints.EAST)
-                .setInsets(5, 0, 5, 10));
-        add(compileFileButton, new GBC(3, 5)
-                .setFill(GridBagConstraints.NONE)
-                .setWeight(100, 0)
-                .setAnchor(GridBagConstraints.EAST)
-                .setInsets(5, 0, 5, 10));
-        add(runFileButton, new GBC(3, 6)
+
+        var rightButtonPane = new JPanel();
+        var rightGridLayout = new GridLayout(3, 1, 0, 5);
+        rightButtonPane.setLayout(rightGridLayout);
+        rightButtonPane.add(formatFileButton);
+        rightButtonPane.add(compileFileButton);
+        rightButtonPane.add(runFileButton);
+        add(rightButtonPane, new GBC(3, 4)
                 .setFill(GridBagConstraints.NONE)
                 .setWeight(100, 0)
                 .setAnchor(GridBagConstraints.EAST)
