@@ -9,6 +9,7 @@ import javax.swing.event.EventListenerList;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -82,6 +83,7 @@ public class MainUI extends JFrame {
 
         var etched = BorderFactory.createEtchedBorder();
         fileTreeScrollPane.setBorder(etched);
+        fileTree.setVisibleRowCount(8);
         add(fileTreeScrollPane,
                 new GBC(0, 1, 4, 1)
                         .setFill(GridBagConstraints.HORIZONTAL)
@@ -160,11 +162,36 @@ public class MainUI extends JFrame {
             }
         });
 
+        disableFileButtons();
+        fileTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        fileTree.addTreeSelectionListener(e -> {
+            var node = (FileTreeNode) fileTree.getLastSelectedPathComponent();
+            if (node == null) {
+                interfaceModel.setSelectedFile(null);
+                disableFileButtons();
+            } else if (node.isLeaf()) {
+                interfaceModel.setSelectedFile(node.getFile());
+                enableFileButtons();
+            }
+        });
+
         pack();
     }
 
+    private void disableFileButtons() {
+        formatFileButton.setEnabled(false);
+        compileFileButton.setEnabled(false);
+        runFileButton.setEnabled(false);
+    }
+
+    private void enableFileButtons() {
+        formatFileButton.setEnabled(true);
+        compileFileButton.setEnabled(true);
+        runFileButton.setEnabled(true);
+    }
+
     class FileTreeModel implements TreeModel {
-        private final EventListenerList  listenerList = new EventListenerList();
+        private final EventListenerList listenerList = new EventListenerList();
 
         @Override
         public Object getRoot() {

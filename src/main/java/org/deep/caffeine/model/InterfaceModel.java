@@ -4,6 +4,7 @@ import java.io.File;
 
 public class InterfaceModel {
     private File mainDirectory;
+    private File selectedFile;
 
     public File getMainDirectory() {
         return mainDirectory;
@@ -23,7 +24,16 @@ public class InterfaceModel {
         return mainDirectory.exists() && mainDirectory.isDirectory();
     }
 
+    public File getSelectedFile() {
+        return selectedFile;
+    }
+
+    public void setSelectedFile(File selectedFile) {
+        this.selectedFile = selectedFile;
+    }
+
     public InterfaceModel() {
-        mainDirectory = new File("");
+        this.mainDirectory = new File("");
+        this.selectedFile = null;
     }
 }

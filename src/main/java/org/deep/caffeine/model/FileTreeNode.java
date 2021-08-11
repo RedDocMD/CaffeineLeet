@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class FileTreeNode {
     private final File file;
     private List<FileTreeNode> children;
-    private boolean isRoot;
+    private final boolean isRoot;
 
     public FileTreeNode(File file, boolean isRoot) {
         this.file = file;
@@ -18,6 +18,10 @@ public class FileTreeNode {
 
     public FileTreeNode(File file) {
         this(file, false);
+    }
+
+    public File getFile() {
+        return file;
     }
 
     public List<FileTreeNode> children() {
@@ -36,8 +40,8 @@ public class FileTreeNode {
                         if (leftIsDir && !rightIsDir)
                             return -1;
                         if (rightIsDir && !leftIsDir)
-                            return -1;
-                        return right.getName().compareTo(left.getName());
+                            return 1;
+                        return left.getName().compareTo(right.getName());
                     })
                     .map(FileTreeNode::new)
                     .collect(Collectors.toList());
