@@ -1,7 +1,11 @@
 package org.deep.caffeine.ui;
 
+import org.deep.caffeine.model.InterfaceModel;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class MainUI extends JFrame {
     private final JTextField pathField;
@@ -16,6 +20,7 @@ public class MainUI extends JFrame {
     private final JButton formatFileButton;
     private final JButton compileFileButton;
     private final JButton runFileButton;
+    private final InterfaceModel interfaceModel;
 
     public MainUI() {
         setTitle("Caffeine Leet");
@@ -27,7 +32,6 @@ public class MainUI extends JFrame {
         inputArea = new JTextArea();
         expectedArea = new JTextArea();
         outputArea = new JTextArea();
-
         clearInputButton = new JButton("Clear Input");
         clearExpectedButton = new JButton("Clear Expected");
         clearOutputButton = new JButton("Clear Output");
@@ -35,10 +39,13 @@ public class MainUI extends JFrame {
         compileFileButton = new JButton("Compile File");
         runFileButton = new JButton("Run File");
 
+        interfaceModel = new InterfaceModel();
+
         initLayout();
     }
 
     private void initLayout() {
+        // Setup visuals
         var layout = new GridBagLayout();
         setLayout(layout);
 
@@ -117,6 +124,30 @@ public class MainUI extends JFrame {
                 .setWeight(100, 0)
                 .setAnchor(GridBagConstraints.EAST)
                 .setInsets(10, 0, 10, 10));
+
+        // Setup listeners
+        pathField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                super.keyTyped(e);
+                interfaceModel.setMainDirectory(pathField.getText().trim());
+                if (interfaceModel.isMainDirectoryValid())
+                    pathField.setForeground(Color.BLACK);
+                else pathField.setForeground(Color.RED);
+            }
+        });
+
+        var directoryChooser = new JFileChooser();
+        directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        browseButton.addActionListener(e -> {
+            directoryChooser.setCurrentDirectory(interfaceModel.getFileChooserDirectory());
+            var result = directoryChooser.showOpenDialog(MainUI.this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                var dir = directoryChooser.getSelectedFile().getPath();
+                interfaceModel.setMainDirectory(dir);
+                pathField.setText(dir);
+            }
+        });
 
         pack();
     }
