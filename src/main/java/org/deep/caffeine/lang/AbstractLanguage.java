@@ -29,10 +29,16 @@ public abstract class AbstractLanguage implements Language {
         }
 
         var processOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        var output = processOutput.lines().reduce("", (old, line) -> old + "\n" + line);
+        var output = processOutput.lines().reduce("", (old, line) -> {
+            if (old.isEmpty()) return line;
+            else return old + "\n" + line;
+        });
 
         var processError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        var error = processError.lines().reduce("", (old, line) -> old + "\n" + line);
+        var error = processError.lines().reduce("", (old, line) -> {
+            if (old.isEmpty()) return line;
+            else return old + "\n" + line;
+        });
 
         return new ProcessResult(output, error, process.exitValue());
     }

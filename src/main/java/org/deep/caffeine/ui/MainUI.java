@@ -2,6 +2,7 @@ package org.deep.caffeine.ui;
 
 import org.deep.caffeine.lang.Cpp;
 import org.deep.caffeine.lang.Language;
+import org.deep.caffeine.lang.ProcessResult;
 import org.deep.caffeine.model.EmptyFileTreeNode;
 import org.deep.caffeine.model.FileTreeNode;
 import org.deep.caffeine.model.InterfaceModel;
@@ -175,10 +176,10 @@ public class MainUI extends JFrame {
         fileTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         fileTree.addTreeSelectionListener(e -> {
             var node = (FileTreeNode) fileTree.getLastSelectedPathComponent();
+            disableFileButtons();
             if (node == null) {
                 interfaceModel.setSelectedFile(null);
                 interfaceModel.setSelectedFileLanguage(null);
-                disableFileButtons();
             } else if (node.isLeaf()) {
                 var file = node.getFile();
                 interfaceModel.setSelectedFile(file);
@@ -186,34 +187,34 @@ public class MainUI extends JFrame {
                 for (var lang : LANGUAGES) {
                     if (lang.hasFile(file.getName())) {
                         interfaceModel.setSelectedFileLanguage(lang);
-                        enableFileButtons();
+                        if (lang.hasCompiler()) enableFileButtons();
+                        else enableNonCompileFileButtons();
                         break;
                     }
                 }
             }
         });
 
-        runFileButton.addActionListener(e -> {
+        formatFileButton.addActionListener(e -> {
             var file = interfaceModel.getSelectedFile();
             var lang = interfaceModel.getSelectedFileLanguage();
-            if (lang != null) {
-                try {
-                    var result = lang.compile(file, false);
-                    if (result.getExitCode() != 0) {
-                        outputArea.setText(result.getStderrValue());
-                    } else {
-                        assert(result.getCreatedFile().isPresent());
-                        var compiledFile = result.getCreatedFile().get();
-                        result = lang.run(compiledFile, inputArea.getText());
-                        if (result.getExitCode() == 0) {
-                            outputArea.setText(result.getStdoutValue());
-                        } else {
-                            outputArea.setText(result.getStderrValue());
-                        }
-                    }
-                } catch (IOException | InterruptedException ex) {
-                    ex.printStackTrace();
-                }
+            assert (lang != null);
+            try {
+                lang.format(file);
+            } catch (IOException | InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        compileFileButton.addActionListener(e -> compileFile(false));
+        debugCompileButton.addActionListener(e -> compileFile(true));
+
+        runFileButton.addActionListener(e -> runFile());
+        runAndDiffButton.addActionListener(e -> {
+            var result = runFile();
+            if (result != null) {
+                var expectedOutput = expectedArea.getText();
+                var actualOutput = result.getStdoutValue();
             }
         });
 
@@ -222,6 +223,49 @@ public class MainUI extends JFrame {
         clearExpectedButton.addActionListener(e -> expectedArea.setText(""));
 
         pack();
+    }
+
+    private ProcessResult runFile() {
+        var file = interfaceModel.getSelectedFile();
+        var lang = interfaceModel.getSelectedFileLanguage();
+        outputArea.setText("");
+        assert (lang != null);
+        try {
+            ProcessResult result;
+            if (lang.hasCompiler()) {
+                result = lang.compile(file, false);
+                if (result.getExitCode() == 0) {
+                    assert(result.getCreatedFile().isPresent());
+                    var compiledFile = result.getCreatedFile().get();
+                    result = lang.run(compiledFile, inputArea.getText());
+                }
+            } else {
+                result = lang.run(file, inputArea.getText());
+            }
+            if (result.getExitCode() == 0) {
+                outputArea.setText(result.getStdoutValue());
+            } else {
+                outputArea.setText(result.getStderrValue());
+            }
+            return result;
+        } catch (IOException | InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    private void compileFile(boolean debug) {
+        var file = interfaceModel.getSelectedFile();
+        var lang = interfaceModel.getSelectedFileLanguage();
+        outputArea.setText("");
+        assert (lang != null);
+        try {
+            var result = lang.compile(file, debug);
+            if (result.getExitCode() != 0)
+                outputArea.setText(result.getStderrValue());
+        } catch (IOException | InterruptedException ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void disableFileButtons() {
@@ -236,6 +280,12 @@ public class MainUI extends JFrame {
         formatFileButton.setEnabled(true);
         compileFileButton.setEnabled(true);
         debugCompileButton.setEnabled(true);
+        runFileButton.setEnabled(true);
+        runAndDiffButton.setEnabled(true);
+    }
+
+    private void enableNonCompileFileButtons() {
+        formatFileButton.setEnabled(true);
         runFileButton.setEnabled(true);
         runAndDiffButton.setEnabled(true);
     }

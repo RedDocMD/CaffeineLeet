@@ -14,6 +14,11 @@ public class Cpp extends AbstractLanguage {
     }
 
     @Override
+    public boolean hasCompiler() {
+        return true;
+    }
+
+    @Override
     public ProcessResult compile(File file, boolean debug) throws IOException, InterruptedException {
         var fileName = file.getName();
         var fileNameNoExt = fileName.substring(0, fileName.indexOf('.'));
@@ -31,5 +36,10 @@ public class Cpp extends AbstractLanguage {
                 .start();
 
         return AbstractLanguage.processResult(process, 10).withFile(compiledFile);
+    }
+
+    @Override
+    public ProcessResult format(File file) throws IOException, InterruptedException {
+        return null;
     }
 }
