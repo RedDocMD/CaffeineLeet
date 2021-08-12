@@ -1,6 +1,7 @@
 package org.deep.caffeine.lang;
 
 import java.io.*;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractLanguage implements Language {
     @Override
@@ -18,11 +19,14 @@ public abstract class AbstractLanguage implements Language {
         processInput.flush();
         processInput.close();
 
-        return AbstractLanguage.processResult(process);
+        return AbstractLanguage.processResult(process, 5);
     }
 
-    static ProcessResult processResult(Process process) throws InterruptedException {
-        var exitCode = process.waitFor();
+    static ProcessResult processResult(Process process, int waitTime) throws InterruptedException {
+        var exited = process.waitFor(waitTime, TimeUnit.SECONDS);
+        if (!exited) {
+            return new ProcessResult("", "Process timed out", 1);
+        }
 
         var processOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
         var output = processOutput.lines().reduce("", (old, line) -> old + "\n" + line);
@@ -30,6 +34,6 @@ public abstract class AbstractLanguage implements Language {
         var processError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
         var error = processError.lines().reduce("", (old, line) -> old + "\n" + line);
 
-        return new ProcessResult(output, error, exitCode);
+        return new ProcessResult(output, error, process.exitValue());
     }
 }

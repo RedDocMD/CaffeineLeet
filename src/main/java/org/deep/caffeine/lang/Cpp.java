@@ -30,6 +30,6 @@ public class Cpp extends AbstractLanguage {
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start();
 
-        return AbstractLanguage.processResult(process).withFile(compiledFile);
+        return AbstractLanguage.processResult(process, 10).withFile(compiledFile);
     }
 }

@@ -29,7 +29,9 @@ public class MainUI extends JFrame {
     private final JButton clearOutputButton;
     private final JButton formatFileButton;
     private final JButton compileFileButton;
+    private final JButton debugCompileButton;
     private final JButton runFileButton;
+    private final JButton runAndDiffButton;
     private final InterfaceModel interfaceModel;
 
     private static final Language[] LANGUAGES = {new Cpp()};
@@ -52,7 +54,9 @@ public class MainUI extends JFrame {
         clearOutputButton = new JButton("Clear Output");
         formatFileButton = new JButton("Format File");
         compileFileButton = new JButton("Compile File");
+        debugCompileButton = new JButton("Debug Compile File");
         runFileButton = new JButton("Run File");
+        runAndDiffButton = new JButton("Run and Diff File");
 
 
         initLayout();
@@ -117,29 +121,29 @@ public class MainUI extends JFrame {
                         .setWeight(100, 100)
                         .setInsets(5, 10, 5, 10));
 
-        var leftButtonPanel = new JPanel();
-        var leftGridLayout = new GridLayout(3, 1, 0, 5);
-        leftButtonPanel.setLayout(leftGridLayout);
-        leftButtonPanel.add(clearInputButton);
-        leftButtonPanel.add(clearExpectedButton);
-        leftButtonPanel.add(clearOutputButton);
-        add(leftButtonPanel, new GBC(0, 4)
+        var clearButtonsPanel = new JPanel();
+        var clearButtonsGridLayout = new GridLayout(1, 3, 10, 0);
+        clearButtonsPanel.setLayout(clearButtonsGridLayout);
+        clearButtonsPanel.add(clearInputButton);
+        clearButtonsPanel.add(clearExpectedButton);
+        clearButtonsPanel.add(clearOutputButton);
+        add(clearButtonsPanel, new GBC(0, 4, 4, 1)
                 .setFill(GridBagConstraints.NONE)
                 .setWeight(100, 0)
-                .setAnchor(GridBagConstraints.WEST)
-                .setInsets(10, 10, 10, 0));
+                .setInsets(10, 10, 10, 10));
 
-        var rightButtonPanel = new JPanel();
-        var rightGridLayout = new GridLayout(3, 1, 0, 5);
-        rightButtonPanel.setLayout(rightGridLayout);
-        rightButtonPanel.add(formatFileButton);
-        rightButtonPanel.add(compileFileButton);
-        rightButtonPanel.add(runFileButton);
-        add(rightButtonPanel, new GBC(3, 4)
+        var fileButtonsPanel = new JPanel();
+        var fileButtonsFlowLayout = new FlowLayout(FlowLayout.CENTER, 10, 5);
+        fileButtonsPanel.setLayout(fileButtonsFlowLayout);
+        fileButtonsPanel.add(formatFileButton);
+        fileButtonsPanel.add(compileFileButton);
+        fileButtonsPanel.add(debugCompileButton);
+        fileButtonsPanel.add(runFileButton);
+        fileButtonsPanel.add(runAndDiffButton);
+        add(fileButtonsPanel, new GBC(0, 5, 4, 1)
                 .setFill(GridBagConstraints.NONE)
                 .setWeight(100, 0)
-                .setAnchor(GridBagConstraints.EAST)
-                .setInsets(10, 0, 10, 10));
+                .setInsets(5, 10, 10, 10));
 
         // Setup listeners
         pathField.addKeyListener(new KeyAdapter() {
@@ -213,19 +217,27 @@ public class MainUI extends JFrame {
             }
         });
 
+        clearInputButton.addActionListener(e -> inputArea.setText(""));
+        clearOutputButton.addActionListener(e -> outputArea.setText(""));
+        clearExpectedButton.addActionListener(e -> expectedArea.setText(""));
+
         pack();
     }
 
     private void disableFileButtons() {
         formatFileButton.setEnabled(false);
         compileFileButton.setEnabled(false);
+        debugCompileButton.setEnabled(false);
         runFileButton.setEnabled(false);
+        runAndDiffButton.setEnabled(false);
     }
 
     private void enableFileButtons() {
         formatFileButton.setEnabled(true);
         compileFileButton.setEnabled(true);
+        debugCompileButton.setEnabled(true);
         runFileButton.setEnabled(true);
+        runAndDiffButton.setEnabled(true);
     }
 
     class FileTreeModel implements TreeModel {
