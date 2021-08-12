@@ -10,9 +10,11 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
     implementation 'com.formdev:flatlaf:1.5'
+    implementation 'io.github.java-diff-utils:java-diff-utils:4.10'
+    implementation 'org.jsoup:jsoup:1.14.1'
 }
 
 test {

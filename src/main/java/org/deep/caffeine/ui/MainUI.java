@@ -1,11 +1,12 @@
 package org.deep.caffeine.ui;
 
+import com.github.difflib.text.*;
 import org.deep.caffeine.lang.Cpp;
 import org.deep.caffeine.lang.Language;
 import org.deep.caffeine.lang.ProcessResult;
-import org.deep.caffeine.model.EmptyFileTreeNode;
-import org.deep.caffeine.model.FileTreeNode;
-import org.deep.caffeine.model.InterfaceModel;
+import org.deep.caffeine.model.*;
+import org.jsoup.*;
+import org.jsoup.nodes.*;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
@@ -17,6 +18,9 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.*;
+import java.util.List;
+import java.util.stream.*;
 
 public class MainUI extends JFrame {
     private final JTextField pathField;
@@ -212,9 +216,10 @@ public class MainUI extends JFrame {
         runFileButton.addActionListener(e -> runFile());
         runAndDiffButton.addActionListener(e -> {
             var result = runFile();
-            if (result != null) {
+            if (result != null && result.getExitCode() == 0) {
                 var expectedOutput = expectedArea.getText();
                 var actualOutput = result.getStdoutValue();
+                diffOutputs(expectedOutput, actualOutput);
             }
         });
 
@@ -223,6 +228,71 @@ public class MainUI extends JFrame {
         clearExpectedButton.addActionListener(e -> expectedArea.setText(""));
 
         pack();
+    }
+
+    private void diffOutputs(String expected, String actual) {
+        var expectedLines = splitLines(expected);
+        var actualLines = splitLines(actual);
+        var diffRows = diffRows(expectedLines, actualLines);
+        for (var diffRow : diffRows) {
+            var diffStrings = diffRowToStrings(diffRow);
+            System.out.println(diffStrings);
+        }
+    }
+
+    private List<DiffRow> diffRows(List<String> expected, List<String> actual) {
+        var diffRowGenerator = DiffRowGenerator.create()
+                .showInlineDiffs(true)
+                .inlineDiffByWord(true)
+                .mergeOriginalRevised(true)
+                .columnWidth(200)
+                .build();
+        List<DiffRow> rows = new ArrayList<>();
+        if (expected.size() == actual.size()) {
+            for (int i = 0, size = expected.size(); i < size; i++) {
+                var expectedList = List.of(expected.get(i));
+                var actualList = List.of(actual.get(i));
+                var rowsList = diffRowGenerator.generateDiffRows(expectedList, actualList);
+                assert (rowsList.size() == 1);
+                rows.add(rowsList.get(0));
+            }
+        } else {
+            rows = diffRowGenerator.generateDiffRows(expected, actual);
+        }
+        return rows;
+    }
+
+    private List<String> splitLines(String content) {
+        var lines = new ArrayList<>(Arrays.asList(content.split("\n")));
+        if (lines.size() >= 1 && lines.get(lines.size() - 1).isEmpty()) {
+            lines.remove(lines.size() - 1);
+        }
+        return lines;
+    }
+
+    private List<DiffString> diffRowToStrings(DiffRow row) {
+        var doc = Jsoup.parseBodyFragment(row.getOldLine());
+        var body = doc.body();
+        return body.childNodes()
+                .stream()
+                .map(node -> {
+                    if (node instanceof TextNode) {
+                        var textNode = (TextNode) node;
+                        return new DiffString(textNode.text(), DiffStringType.Same);
+                    } else {
+                        assert(node instanceof Element);
+                        var el = (Element) node;
+                        assert(el.tagName().equals("span"));
+                        var classVal = el.attr("class");
+                        if (classVal.equals("editOldInline")) {
+                            return new DiffString(el.html(), DiffStringType.Old);
+                        } else if (classVal.equals("editNewInline")) {
+                            return new DiffString(el.html(), DiffStringType.New);
+                        }
+                        throw new IllegalArgumentException("Invalid class attribute of DiffRow span");
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     private ProcessResult runFile() {
@@ -235,7 +305,7 @@ public class MainUI extends JFrame {
             if (lang.hasCompiler()) {
                 result = lang.compile(file, false);
                 if (result.getExitCode() == 0) {
-                    assert(result.getCreatedFile().isPresent());
+                    assert (result.getCreatedFile().isPresent());
                     var compiledFile = result.getCreatedFile().get();
                     result = lang.run(compiledFile, inputArea.getText());
                 }
