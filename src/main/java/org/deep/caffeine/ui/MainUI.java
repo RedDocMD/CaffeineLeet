@@ -1,5 +1,7 @@
 package org.deep.caffeine.ui;
 
+import org.deep.caffeine.lang.Cpp;
+import org.deep.caffeine.lang.Language;
 import org.deep.caffeine.model.EmptyFileTreeNode;
 import org.deep.caffeine.model.FileTreeNode;
 import org.deep.caffeine.model.InterfaceModel;
@@ -13,6 +15,7 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 
 public class MainUI extends JFrame {
     private final JTextField pathField;
@@ -28,6 +31,8 @@ public class MainUI extends JFrame {
     private final JButton compileFileButton;
     private final JButton runFileButton;
     private final InterfaceModel interfaceModel;
+
+    private static final Language[] LANGUAGES = {new Cpp()};
 
     public MainUI() {
         setTitle("Caffeine Leet");
@@ -168,10 +173,43 @@ public class MainUI extends JFrame {
             var node = (FileTreeNode) fileTree.getLastSelectedPathComponent();
             if (node == null) {
                 interfaceModel.setSelectedFile(null);
+                interfaceModel.setSelectedFileLanguage(null);
                 disableFileButtons();
             } else if (node.isLeaf()) {
-                interfaceModel.setSelectedFile(node.getFile());
-                enableFileButtons();
+                var file = node.getFile();
+                interfaceModel.setSelectedFile(file);
+                interfaceModel.setSelectedFileLanguage(null);
+                for (var lang : LANGUAGES) {
+                    if (lang.hasFile(file.getName())) {
+                        interfaceModel.setSelectedFileLanguage(lang);
+                        enableFileButtons();
+                        break;
+                    }
+                }
+            }
+        });
+
+        runFileButton.addActionListener(e -> {
+            var file = interfaceModel.getSelectedFile();
+            var lang = interfaceModel.getSelectedFileLanguage();
+            if (lang != null) {
+                try {
+                    var result = lang.compile(file, false);
+                    if (result.getExitCode() != 0) {
+                        outputArea.setText(result.getStderrValue());
+                    } else {
+                        assert(result.getCreatedFile().isPresent());
+                        var compiledFile = result.getCreatedFile().get();
+                        result = lang.run(compiledFile, inputArea.getText());
+                        if (result.getExitCode() == 0) {
+                            outputArea.setText(result.getStdoutValue());
+                        } else {
+                            outputArea.setText(result.getStderrValue());
+                        }
+                    }
+                } catch (IOException | InterruptedException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 

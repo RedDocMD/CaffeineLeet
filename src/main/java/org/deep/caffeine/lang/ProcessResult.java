@@ -7,14 +7,7 @@ public class ProcessResult {
     private final String stdoutValue;
     private final String stderrValue;
     private final int exitCode;
-    private final Optional<File> createdFile;
-
-    public ProcessResult(String stdoutValue, String stderrValue, int exitCode, File createdFile) {
-        this.stdoutValue = stdoutValue;
-        this.stderrValue = stderrValue;
-        this.exitCode = exitCode;
-        this.createdFile = Optional.of(createdFile);
-    }
+    private Optional<File> createdFile;
 
     public String getStdoutValue() {
         return stdoutValue;
@@ -37,5 +30,10 @@ public class ProcessResult {
         this.stderrValue = stderrValue;
         this.exitCode = exitCode;
         this.createdFile = Optional.empty();
+    }
+
+    public ProcessResult withFile(File file) {
+        this.createdFile = Optional.of(file);
+        return this;
     }
 }

@@ -1,10 +1,21 @@
 package org.deep.caffeine.model;
 
+import org.deep.caffeine.lang.Language;
+
 import java.io.File;
 
 public class InterfaceModel {
     private File mainDirectory;
     private File selectedFile;
+    private Language selectedFileLanguage;
+
+    public Language getSelectedFileLanguage() {
+        return selectedFileLanguage;
+    }
+
+    public void setSelectedFileLanguage(Language selectedFileLanguage) {
+        this.selectedFileLanguage = selectedFileLanguage;
+    }
 
     public File getMainDirectory() {
         return mainDirectory;

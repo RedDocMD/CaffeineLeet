@@ -18,6 +18,10 @@ public abstract class AbstractLanguage implements Language {
         processInput.flush();
         processInput.close();
 
+        return AbstractLanguage.processResult(process);
+    }
+
+    static ProcessResult processResult(Process process) throws InterruptedException {
         var exitCode = process.waitFor();
 
         var processOutput = new BufferedReader(new InputStreamReader(process.getInputStream()));
