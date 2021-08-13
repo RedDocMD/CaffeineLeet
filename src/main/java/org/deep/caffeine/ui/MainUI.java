@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.stream.*;
 
 public class MainUI extends JFrame {
-    private static final Language[] LANGUAGES = {new Cpp()};
+    private static final Language[] LANGUAGES = {new Cpp(), new Go(), new Python()};
     private final JTextField pathField;
     private final JButton browseButton;
     private final JTree fileTree;
@@ -244,7 +244,11 @@ public class MainUI extends JFrame {
             var lang = interfaceModel.getSelectedFileLanguage();
             assert (lang != null);
             try {
-                lang.format(file);
+                outputArea.setText("");
+                var result = lang.format(file);
+                if (result != null && result.getExitCode() != 0) {
+                    outputArea.setText(result.getStderrValue());
+                }
             } catch (IOException | InterruptedException ex) {
                 ex.printStackTrace();
             }
