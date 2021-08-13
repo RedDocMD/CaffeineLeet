@@ -1,18 +1,26 @@
 package org.deep.caffeine.model;
 
 public class DiffString {
-    private final String thing;
+    private final String text;
     private final DiffStringType type;
 
-    public DiffString(String thing, DiffStringType type) {
-        this.thing = thing;
+    public DiffString(String text, DiffStringType type) {
+        this.text = text;
         this.type = type;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public DiffStringType getType() {
+        return type;
     }
 
     @Override
     public String toString() {
         return "DiffString{" +
-                "thing='" + thing + '\'' +
+                "text='" + text + '\'' +
                 ", type=" + type +
                 '}';
     }

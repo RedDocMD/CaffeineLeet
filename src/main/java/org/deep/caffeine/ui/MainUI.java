@@ -1,28 +1,23 @@
 package org.deep.caffeine.ui;
 
 import com.github.difflib.text.*;
-import org.deep.caffeine.lang.Cpp;
-import org.deep.caffeine.lang.Language;
-import org.deep.caffeine.lang.ProcessResult;
+import org.deep.caffeine.lang.*;
 import org.deep.caffeine.model.*;
 import org.jsoup.*;
 import org.jsoup.nodes.*;
 
 import javax.swing.*;
-import javax.swing.event.EventListenerList;
-import javax.swing.event.TreeModelListener;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
+import javax.swing.event.*;
+import javax.swing.tree.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.util.*;
+import java.awt.event.*;
+import java.io.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.*;
 
 public class MainUI extends JFrame {
+    private static final Language[] LANGUAGES = {new Cpp()};
     private final JTextField pathField;
     private final JButton browseButton;
     private final JTree fileTree;
@@ -38,8 +33,6 @@ public class MainUI extends JFrame {
     private final JButton runFileButton;
     private final JButton runAndDiffButton;
     private final InterfaceModel interfaceModel;
-
-    private static final Language[] LANGUAGES = {new Cpp()};
 
     public MainUI() {
         setTitle("Caffeine Leet");
@@ -234,9 +227,20 @@ public class MainUI extends JFrame {
         var expectedLines = splitLines(expected);
         var actualLines = splitLines(actual);
         var diffRows = diffRows(expectedLines, actualLines);
-        for (var diffRow : diffRows) {
-            var diffStrings = diffRowToStrings(diffRow);
-            System.out.println(diffStrings);
+        var diffStringsMatrix = diffRows
+                .stream()
+                .map(this::diffRowToStrings)
+                .collect(Collectors.toList());
+        var mustNotDiff = diffStringsMatrix.stream()
+                .allMatch(list -> list.stream()
+                        .allMatch(str -> str.getType() == DiffStringType.Same));
+        if (!mustNotDiff) {
+            var diff = new DiffPanel(diffStringsMatrix);
+            JOptionPane.showMessageDialog(this, diff,
+                    "Outputs differ", JOptionPane.ERROR_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Obtained output matches expected",
+                    "Outputs same", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
@@ -280,9 +284,9 @@ public class MainUI extends JFrame {
                         var textNode = (TextNode) node;
                         return new DiffString(textNode.text(), DiffStringType.Same);
                     } else {
-                        assert(node instanceof Element);
+                        assert (node instanceof Element);
                         var el = (Element) node;
-                        assert(el.tagName().equals("span"));
+                        assert (el.tagName().equals("span"));
                         var classVal = el.attr("class");
                         if (classVal.equals("editOldInline")) {
                             return new DiffString(el.html(), DiffStringType.Old);
