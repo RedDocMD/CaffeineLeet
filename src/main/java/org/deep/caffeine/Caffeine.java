@@ -13,6 +13,7 @@ public class Caffeine {
             public void run() {
                 FlatLightLaf.setup();
                 var ui = new MainUI();
+                ui.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/caffeine.png")));
                 ui.setVisible(true);
                 ui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             }
