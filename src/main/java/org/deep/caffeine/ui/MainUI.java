@@ -1,6 +1,8 @@
 package org.deep.caffeine.ui;
 
 import com.github.difflib.text.*;
+import com.google.gson.*;
+import org.deep.caffeine.cache.*;
 import org.deep.caffeine.lang.*;
 import org.deep.caffeine.model.*;
 import org.jsoup.*;
@@ -12,6 +14,7 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.nio.file.*;
 import java.util.List;
 import java.util.*;
 import java.util.stream.*;
@@ -33,12 +36,32 @@ public class MainUI extends JFrame {
     private final JButton runFileButton;
     private final JButton runAndDiffButton;
     private final InterfaceModel interfaceModel;
+    private final Cache cache;
+    private final File cacheFile;
+    private final Gson gson;
 
     public MainUI() {
         setTitle("Caffeine Leet");
         setPreferredSize(new Dimension(800, 800));
 
         interfaceModel = new InterfaceModel();
+        var homeDir = new File(System.getProperty("user.home"));
+        cacheFile = new File(homeDir, ".caffeine_leet.cache");
+        Cache tempCache = null;
+        gson = new Gson();
+        if (cacheFile.exists() && cacheFile.isFile()) {
+            try {
+                var content = Files.readString(Path.of(cacheFile.getPath()));
+                tempCache = gson.fromJson(content, Cache.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (tempCache == null)
+            tempCache = new Cache();
+        cache = tempCache;
+        interfaceModel.setMainDirectory(cache.getDirectory());
 
         pathField = new JTextField(50);
         browseButton = new JButton("Browse");
@@ -56,6 +79,7 @@ public class MainUI extends JFrame {
         runFileButton = new JButton("Run File");
         runAndDiffButton = new JButton("Run and Diff File");
 
+        pathField.setText(cache.getDirectory());
 
         initLayout();
     }
@@ -144,11 +168,28 @@ public class MainUI extends JFrame {
                 .setInsets(5, 10, 10, 10));
 
         // Setup listeners
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                var cacheContent = gson.toJson(cache);
+                try {
+                    var writer = new BufferedWriter(new FileWriter(cacheFile));
+                    writer.write(cacheContent);
+                    writer.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                super.windowClosing(e);
+            }
+        });
+
         pathField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
                 super.keyTyped(e);
-                interfaceModel.setMainDirectory(pathField.getText().trim());
+                var dir = pathField.getText().trim();
+                interfaceModel.setMainDirectory(dir);
+                cache.setDirectory(dir);
                 if (interfaceModel.isMainDirectoryValid())
                     pathField.setForeground(Color.BLACK);
                 else pathField.setForeground(Color.RED);
@@ -165,6 +206,7 @@ public class MainUI extends JFrame {
                 var dir = directoryChooser.getSelectedFile().getPath();
                 interfaceModel.setMainDirectory(dir);
                 pathField.setText(dir);
+                cache.setDirectory(dir);
                 fileTree.updateUI();
             }
         });
@@ -188,6 +230,11 @@ public class MainUI extends JFrame {
                         else enableNonCompileFileButtons();
                         break;
                     }
+                }
+                var entry = cache.getEntry(file);
+                if (entry != null) {
+                    inputArea.setText(entry.getInput());
+                    expectedArea.setText(entry.getExpected());
                 }
             }
         });
@@ -303,6 +350,8 @@ public class MainUI extends JFrame {
         var file = interfaceModel.getSelectedFile();
         var lang = interfaceModel.getSelectedFileLanguage();
         outputArea.setText("");
+        var entry = new CacheEntry(inputArea.getText(), expectedArea.getText());
+        cache.addEntry(file, entry);
         assert (lang != null);
         try {
             ProcessResult result;
