@@ -28,3 +28,9 @@ jar {
         attributes 'Main-Class': 'org.deep.caffeine.Caffeine'
     }
 }
+
+shadowJar {
+    archiveBaseName.set('CaffeineLeet')
+    archiveClassifier.set('')
+    archiveVersion.set('')
+}

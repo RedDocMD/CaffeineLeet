@@ -29,4 +29,4 @@ jobs:
         python3 -m pip install gitpython termcolor requests
     - name: Upload Assets
       run: |
-        python3 .github/workflows/make_release.py target/release/cork $GITHUB_TOKEN
+        python3 .github/workflows/make_release.py build/libs/CaffeineLeet.jar $GITHUB_TOKEN
