@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.stream.*;
 
 public class MainUI extends JFrame {
-    private static final Language[] LANGUAGES = {new Cpp(), new Go(), new Python()};
+    private static final Language[] LANGUAGES = {new Cpp(), new Go(), new Python(), new Rust()};
     private final JTextField pathField;
     private final JButton browseButton;
     private final JTree fileTree;
