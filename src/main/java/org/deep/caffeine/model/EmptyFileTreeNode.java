@@ -8,7 +8,7 @@ public class EmptyFileTreeNode extends FileTreeNode {
     public static EmptyFileTreeNode INSTANCE = new EmptyFileTreeNode();
 
     private EmptyFileTreeNode() {
-        super(new File(""), false);
+        super(new File(""), false, null);
     }
 
     @Override

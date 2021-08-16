@@ -426,7 +426,9 @@ public class MainUI extends JFrame {
         @Override
         public Object getRoot() {
             var dir = interfaceModel.getMainDirectory();
-            return interfaceModel.isMainDirectoryValid() ? new FileTreeNode(dir, true) : EmptyFileTreeNode.INSTANCE;
+            return interfaceModel.isMainDirectoryValid()
+                    ? new FileTreeNode(dir, true, Arrays.asList(LANGUAGES))
+                    : EmptyFileTreeNode.INSTANCE;
         }
 
         @Override

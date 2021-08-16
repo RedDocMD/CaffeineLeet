@@ -1,5 +1,7 @@
 package org.deep.caffeine.model;
 
+import org.deep.caffeine.lang.*;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -10,14 +12,16 @@ public class FileTreeNode {
     private final File file;
     private List<FileTreeNode> children;
     private final boolean isRoot;
+    private final List<Language> languages;
 
-    public FileTreeNode(File file, boolean isRoot) {
+    public FileTreeNode(File file, boolean isRoot, List<Language> languages) {
         this.file = file;
         this.isRoot = isRoot;
+        this.languages = languages;
     }
 
-    public FileTreeNode(File file) {
-        this(file, false);
+    public FileTreeNode(File file, List<Language> languages) {
+        this(file, false, languages);
     }
 
     public File getFile() {
@@ -33,6 +37,7 @@ public class FileTreeNode {
             return null;
         } else {
             var childFiles = Arrays.stream(childNames)
+                    .filter(name -> languages.stream().anyMatch(lang -> lang.hasFile(name)))
                     .map(name -> new File(file, name))
                     .sorted((left, right) -> {
                         var rightIsDir = right.isDirectory();
@@ -43,7 +48,7 @@ public class FileTreeNode {
                             return 1;
                         return left.getName().compareTo(right.getName());
                     })
-                    .map(FileTreeNode::new)
+                    .map(file -> new FileTreeNode(file, languages))
                     .collect(Collectors.toList());
             this.children = childFiles;
             return childFiles;
