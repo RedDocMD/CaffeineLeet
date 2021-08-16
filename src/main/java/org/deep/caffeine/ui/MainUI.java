@@ -228,6 +228,9 @@ public class MainUI extends JFrame {
                         interfaceModel.setSelectedFileLanguage(lang);
                         if (lang.hasCompiler()) enableFileButtons();
                         else enableNonCompileFileButtons();
+                        inputArea.setText("");
+                        expectedArea.setText("");
+                        outputArea.setText("");
                         break;
                     }
                 }
