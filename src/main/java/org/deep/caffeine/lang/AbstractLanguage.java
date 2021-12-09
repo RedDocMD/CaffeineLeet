@@ -25,6 +25,7 @@ public abstract class AbstractLanguage implements Language {
     static ProcessResult processResult(Process process, int waitTime) throws InterruptedException {
         var exited = process.waitFor(waitTime, TimeUnit.SECONDS);
         if (!exited) {
+            process.destroy();
             return new ProcessResult("", "Process timed out", 1);
         }
 
