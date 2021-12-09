@@ -6,3 +6,4 @@ A GUI to help you run your CP
 - C++
 - Go
 - Python
+- Rust
