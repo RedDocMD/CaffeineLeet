@@ -35,6 +35,7 @@ public class MainUI extends JFrame {
     private final JButton debugCompileButton;
     private final JButton runFileButton;
     private final JButton runAndDiffButton;
+    private final JButton refreshButton;
     private final InterfaceModel interfaceModel;
     private final Cache cache;
     private final File cacheFile;
@@ -78,6 +79,7 @@ public class MainUI extends JFrame {
         debugCompileButton = new JButton("Debug Compile File");
         runFileButton = new JButton("Run File");
         runAndDiffButton = new JButton("Run and Diff File");
+        refreshButton = new JButton("Refresh");
 
         pathField.setText(cache.getDirectory());
 
@@ -105,7 +107,10 @@ public class MainUI extends JFrame {
                         .setFill(GridBagConstraints.HORIZONTAL)
                         .setWeight(100, 0)
                         .setInsets(10, 10, 5, 10));
-        add(browseButton,
+        var pathEditPanel = new JPanel();
+        pathEditPanel.add(browseButton);
+        pathEditPanel.add(refreshButton);
+        add(pathEditPanel,
                 new GBC(3, 0)
                         .setFill(GridBagConstraints.NONE)
                         .setWeight(100, 0)
@@ -210,6 +215,8 @@ public class MainUI extends JFrame {
                 fileTree.updateUI();
             }
         });
+
+        refreshButton.addActionListener(e -> fileTree.updateUI());
 
         disableFileButtons();
         fileTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
