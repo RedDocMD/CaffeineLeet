@@ -1,6 +1,5 @@
 package org.deep.caffeine;
 
-import com.formdev.flatlaf.FlatLightLaf;
 import org.deep.caffeine.ui.MainUI;
 
 import javax.swing.*;
@@ -11,7 +10,6 @@ public class Caffeine {
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                FlatLightLaf.setup();
                 var ui = new MainUI();
                 ui.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/caffeine.png")));
                 ui.setVisible(true);
