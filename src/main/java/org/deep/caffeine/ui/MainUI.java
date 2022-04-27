@@ -40,8 +40,9 @@ public class MainUI extends JFrame {
     private final Cache cache;
     private final File cacheFile;
     private final Gson gson;
+    private final Font iosevkaHeavy;
 
-    public MainUI() {
+    public MainUI() throws IOException, FontFormatException {
         setTitle("Caffeine Leet");
         setPreferredSize(new Dimension(800, 800));
 
@@ -64,13 +65,33 @@ public class MainUI extends JFrame {
         cache = tempCache;
         interfaceModel.setMainDirectory(cache.getDirectory());
 
+        var baseIosevkaRegular = Font.createFont(Font.TRUETYPE_FONT,
+                Objects.requireNonNull(getClass().getResourceAsStream("/iosevka-etoile-regular.ttf")));
+        Font iosevkaRegular = baseIosevkaRegular.deriveFont(13.0f);
+        var baseIosevkaHeavy = Font.createFont(Font.TRUETYPE_FONT,
+                Objects.requireNonNull(getClass().getResourceAsStream("/iosevka-etoile-heavy.ttf")));
+        iosevkaHeavy = baseIosevkaHeavy.deriveFont(13.0f);
+
         pathField = new JTextField(50);
         browseButton = new JButton("Browse");
         var fileTreeModel = new FileTreeModel();
         fileTree = new JTree(fileTreeModel);
+
+        pathField.setFont(iosevkaRegular);
+        browseButton.setFont(iosevkaHeavy);
+        fileTree.setFont(iosevkaRegular);
+
         inputArea = new JTextArea();
         expectedArea = new JTextArea();
         outputArea = new JTextArea();
+
+        var baseFiraCodeRegular = Font.createFont(Font.TRUETYPE_FONT,
+                Objects.requireNonNull(getClass().getResourceAsStream("/FiraCode-Regular.ttf")));
+        Font firaCodeRegular = baseFiraCodeRegular.deriveFont(14.0f);
+        inputArea.setFont(firaCodeRegular);
+        expectedArea.setFont(firaCodeRegular);
+        outputArea.setFont(firaCodeRegular);
+
         clearInputButton = new JButton("Clear Input");
         clearExpectedButton = new JButton("Clear Expected");
         clearOutputButton = new JButton("Clear Output");
@@ -80,6 +101,16 @@ public class MainUI extends JFrame {
         runFileButton = new JButton("Run File");
         runAndDiffButton = new JButton("Run and Diff File");
         refreshButton = new JButton("Refresh");
+
+        clearInputButton.setFont(iosevkaHeavy);
+        clearExpectedButton.setFont(iosevkaHeavy);
+        clearOutputButton.setFont(iosevkaHeavy);
+        formatFileButton.setFont(iosevkaHeavy);
+        compileFileButton.setFont(iosevkaHeavy);
+        debugCompileButton.setFont(iosevkaHeavy);
+        runFileButton.setFont(iosevkaHeavy);
+        runAndDiffButton.setFont(iosevkaHeavy);
+        refreshButton.setFont(iosevkaHeavy);
 
         pathField.setText(cache.getDirectory());
 
@@ -100,6 +131,7 @@ public class MainUI extends JFrame {
         var pathPanelLayout = new BorderLayout(5, 0);
         pathPanel.setLayout(pathPanelLayout);
         var pathLabel = new JLabel("Directory:", JLabel.RIGHT);
+        pathLabel.setFont(iosevkaHeavy);
         pathPanel.add(pathLabel, BorderLayout.WEST);
         pathPanel.add(pathField, BorderLayout.CENTER);
         add(pathPanel,
@@ -130,10 +162,14 @@ public class MainUI extends JFrame {
         var inputPaneLayout = new GridLayout(0, 2, 5, 0);
         inputPanel.setLayout(inputPaneLayout);
         etched = BorderFactory.createEtchedBorder();
-        inputScrollPane.setBorder(BorderFactory.createTitledBorder(etched, "Input"));
+        var titledBorder = BorderFactory.createTitledBorder(etched, "Input");
+        titledBorder.setTitleFont(iosevkaHeavy);
+        inputScrollPane.setBorder(titledBorder);
         inputPanel.add(inputScrollPane);
         etched = BorderFactory.createEtchedBorder();
-        expectedScrollPane.setBorder(BorderFactory.createTitledBorder(etched, "Expected Output"));
+        titledBorder = BorderFactory.createTitledBorder(etched, "Expected Output");
+        titledBorder.setTitleFont(iosevkaHeavy);
+        expectedScrollPane.setBorder(titledBorder);
         inputPanel.add(expectedScrollPane);
         add(inputPanel, new GBC(0, 2, 4, 1)
                 .setFill(GridBagConstraints.BOTH)
@@ -141,7 +177,9 @@ public class MainUI extends JFrame {
                 .setInsets(10, 10, 5, 10));
 
         etched = BorderFactory.createEtchedBorder();
-        outputScrollPane.setBorder(BorderFactory.createTitledBorder(etched, "Output"));
+        titledBorder = BorderFactory.createTitledBorder(etched, "Output");
+        titledBorder.setTitleFont(iosevkaHeavy);
+        outputScrollPane.setBorder(titledBorder);
         add(outputScrollPane,
                 new GBC(0, 3, 4, 1)
                         .setFill(GridBagConstraints.BOTH)
@@ -273,7 +311,12 @@ public class MainUI extends JFrame {
             if (result != null && result.getExitCode() == 0) {
                 var expectedOutput = expectedArea.getText();
                 var actualOutput = result.getStdoutValue();
-                diffOutputs(expectedOutput, actualOutput);
+                try {
+                    diffOutputs(expectedOutput, actualOutput);
+                } catch (IOException | FontFormatException ex) {
+                    System.err.println("Failed to create diff UI: " + e);
+                    System.exit(1);
+                }
             }
         });
 
@@ -284,7 +327,7 @@ public class MainUI extends JFrame {
         pack();
     }
 
-    private void diffOutputs(String expected, String actual) {
+    private void diffOutputs(String expected, String actual) throws IOException, FontFormatException {
         var expectedLines = splitLines(expected);
         var actualLines = splitLines(actual);
         var diffRows = diffRows(expectedLines, actualLines);
