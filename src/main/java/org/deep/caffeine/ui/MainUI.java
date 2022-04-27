@@ -114,6 +114,12 @@ public class MainUI extends JFrame {
 
         pathField.setText(cache.getDirectory());
 
+        var baseIosevkaSemiBold = Font.createFont(Font.TRUETYPE_FONT,
+                Objects.requireNonNull(getClass().getResourceAsStream("/iosevka-etoile-semibold.ttf")));
+        var iosevkaSemiBold = baseIosevkaSemiBold.deriveFont(13.0f);
+        UIManager.put("OptionPane.buttonFont", iosevkaHeavy);
+        UIManager.put("OptionPane.messageFont", iosevkaSemiBold);
+
         initLayout();
     }
 
