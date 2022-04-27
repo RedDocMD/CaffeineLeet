@@ -14,7 +14,10 @@ public class Caffeine {
                 MainUI ui = null;
                 try {
                     ui = new MainUI();
-                } catch (IOException | FontFormatException e) {
+                    UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+                } catch (IOException | FontFormatException | UnsupportedLookAndFeelException
+                         | ClassNotFoundException | InstantiationException |
+                         IllegalAccessException e) {
                     System.err.println("Failed to init UI: " + e);
                     System.exit(1);
                 }

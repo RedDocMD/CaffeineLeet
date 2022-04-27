@@ -138,7 +138,7 @@ public class MainUI extends JFrame {
         pathPanel.setLayout(pathPanelLayout);
         var pathLabel = new JLabel("Directory:", JLabel.RIGHT);
         pathLabel.setFont(iosevkaHeavy);
-        pathPanel.add(pathLabel, BorderLayout.WEST);
+        pathPanel.add(pathLabel, BorderLayout.LINE_START);
         pathPanel.add(pathField, BorderLayout.CENTER);
         add(pathPanel,
                 new GBC(0, 0, 3, 1)
